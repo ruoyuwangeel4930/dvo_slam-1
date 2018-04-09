@@ -66,4 +66,6 @@ add_library(dvo_visualization
 
 target_link_libraries(dvo_visualization
   dvo_core
+  ${PCL_COMMON_LIBRARIES}
+  ${PCL_FILTERS_LIBRARIES}
 )

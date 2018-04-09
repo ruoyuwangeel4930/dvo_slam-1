@@ -74,7 +74,7 @@ dvo::core::RgbdImagePyramidPtr load(dvo::core::RgbdCameraPyramid& camera, std::s
 
   if(depth.type() != CV_32FC1)
   {
-    dvo::core::SurfacePyramid::convertRawDepthImageSse(depth, depth_float, 1.0f / 1000.0f);
+    dvo::core::SurfacePyramid::convertRawDepthImageSse(depth, depth_float, 1.0f / 5000.0f);
   }
   else
   {
@@ -384,13 +384,13 @@ void BenchmarkNode::run()
   // TODO: load from file
   //dvo::core::IntrinsicMatrix intrinsics = dvo::core::IntrinsicMatrix::create(525.0f, 525.0f, 320.0f, 240.0f);
   //fr1
-  dvo::core::IntrinsicMatrix intrinsics = dvo::core::IntrinsicMatrix::create(544.47329, 544.47329, 320, 240);
+  //dvo::core::IntrinsicMatrix intrinsics = dvo::core::IntrinsicMatrix::create(517.306408, 516.469215, 318.643040, 255.313989);
 
   //fr2
-  //dvo::core::IntrinsicMatrix intrinsics = dvo::core::IntrinsicMatrix::create(520.9f, 521.0f, 325.1f, 249.7f);
+  //dvo::core::IntrinsicMatrix intrinsics = dvo::core::IntrinsicMatrix::create(520.908620, 521.007327, 325.141442, 249.701764);
 
   //fr3
-  //dvo::core::IntrinsicMatrix intrinsics = dvo::core::IntrinsicMatrix::create(535.4f, 539.2f, 320.1f, 247.6f);
+  dvo::core::IntrinsicMatrix intrinsics = dvo::core::IntrinsicMatrix::create(535.4f, 539.2f, 320.1f, 247.6f);
 
   dvo::core::RgbdCameraPyramid camera(640, 480, intrinsics);
 

@@ -17,6 +17,8 @@
  *  You should have received a copy of the GNU General Public License
  *  along with dvo.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include <pcl/filters/passthrough.h>
+#include <pcl/common/transforms.h>
 
 #include <dvo/visualization/async_point_cloud_builder.h>
 
@@ -60,10 +62,18 @@ AsyncPointCloudBuilder::BuildJob::BuildJob(const dvo::core::RgbdImage& image, co
 
 AsyncPointCloudBuilder::PointCloud::Ptr AsyncPointCloudBuilder::BuildJob::build()
 {
+  // add a range filter
+
   if(!cloud_)
   {
     image.buildPointCloud();
-    dvo::core::RgbdImage::PointCloud pointcloud = pose.cast<float>() * image.pointcloud;
+    dvo::core::RgbdImage::PointCloud pointcloud = image.pointcloud;
+
+    AsyncPointCloudBuilder::PointCloud::Ptr cloud_untransformed(new AsyncPointCloudBuilder::PointCloud());
+    cloud_untransformed->reserve(image.width * image.height);
+
+    AsyncPointCloudBuilder::PointCloud::Ptr cloud_filtered(new AsyncPointCloudBuilder::PointCloud());
+    cloud_filtered->reserve(image.width * image.height);
 
     cloud_.reset(new AsyncPointCloudBuilder::PointCloud());
     cloud_->reserve(image.width * image.height);
@@ -81,6 +91,11 @@ AsyncPointCloudBuilder::PointCloud::Ptr AsyncPointCloudBuilder::BuildJob::build(
     int step = image.hasRgb() ? 3 : 1;
 
     AsyncPointCloudBuilder::PointCloud::PointType p;
+
+    // range filter
+    pcl::PassThrough<AsyncPointCloudBuilder::PointCloud::PointType> pass;
+    pass.setFilterFieldName("z");
+    pass.setFilterLimits(0.0, 4.0);
 
     for(int idx = 0; idx < image.width * image.height; ++idx, intensity_ptr += step)
     {
@@ -103,8 +118,11 @@ AsyncPointCloudBuilder::PointCloud::Ptr AsyncPointCloudBuilder::BuildJob::build(
           p.r = p.g = p.b = *intensity_ptr;
       }
 
-      cloud_->push_back(p);
+      cloud_untransformed->push_back(p);
     }
+      pass.setInputCloud(cloud_untransformed);
+      pass.filter(*cloud_filtered);
+      pcl::transformPointCloud(*cloud_filtered, *cloud_, pose.cast<float>());
   }
   return cloud_;
 }
